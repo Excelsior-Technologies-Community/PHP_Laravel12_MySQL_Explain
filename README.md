@@ -572,4 +572,7 @@ PHP_Laravel12_MySQL_Explain/
 Your PHP_Laravel12_MySQL_Explain Project is now ready!
 
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> development

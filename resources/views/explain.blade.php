@@ -1,171 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MySQL Query Analyzer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel Product Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: #f5f7fb;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        .card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        h2 {
-            margin-top: 0;
-            font-size: 20px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #fff;
-            margin-left: 10px;
-        }
-
-        .badge-red {
-            background: #e74c3c;
-        }
-
-        .badge-green {
-            background: #2ecc71;
-        }
-
-        pre {
-            background: #1e1e1e;
-            color: #00ff9c;
-            padding: 12px;
-            border-radius: 6px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        th {
-            background: #2c3e50;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-
-        .key-empty {
-            color: #e74c3c;
-            font-weight: bold;
-        }
-
-        .key-used {
-            color: #2ecc71;
-            font-weight: bold;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
         }
     </style>
 </head>
-<body>
 
-<div class="container">
+<body class="text-gray-100">
 
-    <!-- BEFORE -->
-    <div class="card">
-        <h2>
-            🔴 Before Optimization
-            <span class="badge badge-red">BAD QUERY</span>
-        </h2>
+<div class="max-w-6xl mx-auto p-6">
 
-        <pre>{{ $queryBefore }}</pre>
-
-        <table>
-            <tr>
-                <th>ID</th>
-                <th>Select Type</th>
-                <th>Table</th>
-                <th>Type</th>
-                <th>Possible Keys</th>
-                <th>Key</th>
-                <th>Rows</th>
-                <th>Extra</th>
-            </tr>
-
-            @foreach($explainBefore as $row)
-                <tr>
-                    <td>{{ $row->id }}</td>
-                    <td>{{ $row->select_type }}</td>
-                    <td>{{ $row->table }}</td>
-                    <td>{{ $row->type }}</td>
-                    <td>{{ $row->possible_keys }}</td>
-                    <td class="{{ $row->key ? 'key-used' : 'key-empty' }}">
-                        {{ $row->key ?: 'NULL' }}
-                    </td>
-                    <td>{{ $row->rows }}</td>
-                    <td>{{ $row->Extra }}</td>
-                </tr>
-            @endforeach
-        </table>
+    <!-- HEADER -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold">📦 Product Dashboard</h1>
+        <p class="text-gray-300">Manage products with search, add, delete & analytics</p>
     </div>
 
-    <!-- AFTER -->
-    <div class="card">
-        <h2>
-            🟢 After Optimization
-            <span class="badge badge-green">OPTIMIZED</span>
-        </h2>
+    <!-- ALERT -->
+    @if(session('success'))
+        <div class="bg-green-600 text-white p-3 rounded mb-4 shadow">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <pre>{{ $queryAfter }}</pre>
+    <!-- STATS -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
 
-        <table>
+        <div class="bg-white/10 backdrop-blur-lg p-5 rounded-xl shadow border border-white/10">
+            <h2 class="text-sm text-gray-300">Total Products</h2>
+            <p class="text-3xl font-bold text-white">{{ $totalProducts }}</p>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-lg p-5 rounded-xl shadow border border-white/10">
+            <h2 class="text-sm text-gray-300">High Price (>500)</h2>
+            <p class="text-3xl font-bold text-green-400">{{ $highPriceProducts }}</p>
+        </div>
+
+    </div>
+
+    <!-- ADD PRODUCT -->
+    <div class="bg-white/10 backdrop-blur-lg p-5 rounded-xl mb-6 border border-white/10">
+
+        <form method="POST" action="{{ route('product.store') }}">
+            @csrf
+
+            <div class="grid grid-cols-3 gap-4">
+                <input type="text" name="name" placeholder="Product Name"
+                    class="p-2 rounded bg-gray-900 border border-gray-700 text-white">
+
+                <input type="text" name="description" placeholder="Description"
+                    class="p-2 rounded bg-gray-900 border border-gray-700 text-white">
+
+                <input type="number" name="price" placeholder="Price"
+                    class="p-2 rounded bg-gray-900 border border-gray-700 text-white">
+            </div>
+
+            <button class="mt-4 bg-blue-500 hover:bg-blue-600 px-5 py-2 rounded text-white">
+                ➕ Add Product
+            </button>
+        </form>
+
+    </div>
+
+    <!-- SEARCH -->
+    <form method="GET" class="mb-5">
+        <input type="text"
+               name="search"
+               value="{{ $search }}"
+               placeholder="🔎 Find products using name, description, or price..."
+               class="w-full p-3 rounded bg-white/10 text-white border border-white/20 backdrop-blur-lg">
+    </form>
+
+    <!-- TABLE -->
+    <div class="bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden border border-white/10">
+
+        <table class="w-full text-sm">
+
+            <thead class="bg-gray-900 text-gray-300">
             <tr>
-                <th>ID</th>
-                <th>Select Type</th>
-                <th>Table</th>
-                <th>Type</th>
-                <th>Possible Keys</th>
-                <th>Key</th>
-                <th>Rows</th>
-                <th>Extra</th>
+                <th class="p-3 text-left">ID</th>
+                <th class="p-3 text-left">Name</th>
+                <th class="p-3 text-left">Description</th>
+                <th class="p-3 text-left">Price</th>
+                <th class="p-3 text-left">Action</th>
             </tr>
+            </thead>
 
-            @foreach($explainAfter as $row)
-                <tr>
-                    <td>{{ $row->id }}</td>
-                    <td>{{ $row->select_type }}</td>
-                    <td>{{ $row->table }}</td>
-                    <td>{{ $row->type }}</td>
-                    <td>{{ $row->possible_keys }}</td>
-                    <td class="{{ $row->key ? 'key-used' : 'key-empty' }}">
-                        {{ $row->key ?: 'NULL' }}
+            <tbody>
+            @foreach($products as $product)
+                <tr class="border-t border-gray-700 hover:bg-white/5 transition">
+
+                    <td class="p-3">{{ $product->id }}</td>
+                    <td class="p-3 font-semibold text-white">{{ $product->name }}</td>
+                    <td class="p-3 text-gray-300">{{ $product->description }}</td>
+                    <td class="p-3 text-green-400 font-bold">${{ $product->price }}</td>
+
+                    <td class="p-3">
+
+                        <form method="POST" action="{{ route('product.delete', $product->id) }}">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-white">
+                                Delete
+                            </button>
+                        </form>
+
                     </td>
-                    <td>{{ $row->rows }}</td>
-                    <td>{{ $row->Extra }}</td>
+
                 </tr>
             @endforeach
+            </tbody>
+
         </table>
+
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="mt-6 text-white">
+        {{ $products->links() }}
     </div>
 
 </div>
